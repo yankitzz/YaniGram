@@ -64,4 +64,4 @@ Este proyecto está bajo la licencia MIT. Consulta el archivo [LICENSE](LICENSE)
 ---
 
 ## ✨ Autor
-Creado por [Tu Nombre o Alias]. ¡Contribuciones y sugerencias son bienvenidas!
+Creado por Yankitzz. ¡Contribuciones y sugerencias son bienvenidas!
