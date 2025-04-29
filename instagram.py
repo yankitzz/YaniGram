@@ -193,8 +193,9 @@ def menu_accion():
 3. Extraer likes de la antepenúltima publicación
 4. Extraer likes de las 3 últimas publicaciones
 5. Extraer seguidos
+6. Herramientas de comparación (comparador)
 """)
-    return input("Selecciona una opción (1-5): ")
+    return input("Selecciona una opción (1-6): ")
 
 def guardar_usuarios_txt(usuarios, nombre_archivo='usuarios_likes.txt'):
     base_dir = os.path.dirname(os.path.abspath(__file__))  # Ruta absoluta de la carpeta YaniGram
@@ -227,42 +228,57 @@ if __name__ == '__main__':
                 print("Extrayendo likes de la última publicación...")
                 ir_a_perfil(driver, tu_usuario)
                 entrar_ultima_publicacion(driver)
-                usuarios_total.update(ver_likes_publicacion(driver))
+                usuarios = set(ver_likes_publicacion(driver))
+                guardar_usuarios_txt(usuarios, nombre_archivo='likes_ultima_publicacion.txt')
+                usuarios_total.update(usuarios)
             elif opcion == '2':
                 print("Extrayendo likes de la penúltima publicación...")
                 ir_a_perfil(driver, tu_usuario)
                 entrar_penultima_publicacion(driver)
-                usuarios_total.update(ver_likes_publicacion(driver))
+                usuarios = set(ver_likes_publicacion(driver))
+                guardar_usuarios_txt(usuarios, nombre_archivo='likes_penultima_publicacion.txt')
+                usuarios_total.update(usuarios)
             elif opcion == '3':
                 print("Extrayendo likes de la antepenúltima publicación...")
                 ir_a_perfil(driver, tu_usuario)
                 entrar_antepenultima_publicacion(driver)
-                usuarios_total.update(ver_likes_publicacion(driver))
+                usuarios = set(ver_likes_publicacion(driver))
+                guardar_usuarios_txt(usuarios, nombre_archivo='likes_antepenultima_publicacion.txt')
+                usuarios_total.update(usuarios)
             elif opcion == '4':
                 print("Extrayendo likes de las 3 últimas publicaciones...")
-                for funcion, nombre in [
-                    (entrar_ultima_publicacion, 'última'),
-                    (entrar_penultima_publicacion, 'penúltima'),
-                    (entrar_antepenultima_publicacion, 'antepenúltima')
-                ]:
+                archivos = [
+                    ('likes_ultima_publicacion.txt', entrar_ultima_publicacion, 'última'),
+                    ('likes_penultima_publicacion.txt', entrar_penultima_publicacion, 'penúltima'),
+                    ('likes_antepenultima_publicacion.txt', entrar_antepenultima_publicacion, 'antepenúltima')
+                ]
+                for archivo, funcion, nombre in archivos:
                     print(f"Procesando {nombre} publicación...")
                     ir_a_perfil(driver, tu_usuario)
                     funcion(driver)
-                    usuarios_total.update(ver_likes_publicacion(driver))
+                    usuarios = set(ver_likes_publicacion(driver))
+                    guardar_usuarios_txt(usuarios, nombre_archivo=archivo)
+                    usuarios_total.update(usuarios)
                 usuarios_total = set(usuarios_total)
+                guardar_usuarios_txt(usuarios_total, nombre_archivo='likes_total.txt')
             elif opcion == '5':
                 print("Extrayendo seguidos...")
                 ir_a_perfil(driver, tu_usuario)
                 seguidos = extraer_todos_los_seguidos(driver)
                 guardar_usuarios_txt(seguidos, nombre_archivo='seguidos.txt')
-                print("✅ Seguidos extraídos y guardados en seguidos.txt.")
+                print("✅ Seguidos extraídos y guardados en datos_extraidos/seguidos.txt.")
+                continue
+            elif opcion == '6':
+                # Llama al menú del comparador
+                from comparador import menu_comparador
+                menu_comparador()
                 continue
             else:
                 print("Opción no válida.")
                 continue
             print(f"Total de usuarios extraídos: {len(usuarios_total)}")
-            guardar_usuarios_txt(usuarios_total)
-            print("✅ Proceso finalizado.")
+            if opcion in ['1', '2', '3', '4']:
+                print("✅ Proceso finalizado y likes guardados en archivos separados por publicación.")
         except Exception as e:
             print(f"❌ Error durante la extracción: {e}")
             print("Puedes intentar de nuevo.")
