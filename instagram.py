@@ -8,6 +8,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from bs4 import BeautifulSoup
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.service import Service
+import os
 
 # --- FUNCIONES PRINCIPALES ---
 def entrar_ultima_publicacion(driver):
@@ -142,10 +143,12 @@ def extraer_todos_los_seguidos(driver, max_scrolls=100):
             if scrolls >= max_scrolls:
                 print("Límite de scroll alcanzado.")
                 break
-        # Extraer los nombres de usuario
-        seguidos_spans = scroll_box.find_elements(By.CSS_SELECTOR, 'span._ap3a._aaco._aacw._aacx._aad7._aade')
-        usuarios_seguidos = [span.text.strip() for span in seguidos_spans if span.text.strip()]
-        print(f"Total de seguidos extraídos: {len(usuarios_seguidos)}")
+        # Extraer los nombres de usuario usando BeautifulSoup para mayor robustez
+        html = scroll_box.get_attribute('innerHTML')
+        soup = BeautifulSoup(html, 'html.parser')
+        spans = soup.find_all('span', class_='_ap3a _aaco _aacw _aacx _aad7 _aade')
+        usuarios_seguidos = [span.get_text(strip=True) for span in spans if span.get_text(strip=True)]
+        print(f"Total de seguidos extraídos: {len(usuarios_seguidos)} (usando BeautifulSoup)")
         for usuario in usuarios_seguidos:
             print(usuario)
         return usuarios_seguidos
@@ -194,10 +197,15 @@ def menu_accion():
     return input("Selecciona una opción (1-5): ")
 
 def guardar_usuarios_txt(usuarios, nombre_archivo='usuarios_likes.txt'):
-    with open(nombre_archivo, 'w', encoding='utf-8') as f:
+    base_dir = os.path.dirname(os.path.abspath(__file__))  # Ruta absoluta de la carpeta YaniGram
+    carpeta = os.path.join(base_dir, 'datos_extraidos')
+    if not os.path.exists(carpeta):
+        os.makedirs(carpeta)
+    ruta_archivo = os.path.join(carpeta, nombre_archivo)
+    with open(ruta_archivo, 'w', encoding='utf-8') as f:
         for usuario in usuarios:
             f.write(usuario + '\n')
-    print(f"Usuarios guardados en {nombre_archivo} ({len(usuarios)} usuarios).")
+    print(f"Usuarios guardados en {ruta_archivo} ({len(usuarios)} usuarios).")
 
 # --- FLUJO PRINCIPAL ---
 if __name__ == '__main__':
